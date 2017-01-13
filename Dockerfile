@@ -57,14 +57,14 @@ ENV MAVEN_HOME /usr/share/maven
 VOLUME /root/.m2
 
 # Step-8 : Get the project from github
-RUN cd /usr/local && git clone https://github.com/HeavyWater-Solutions/HeavyWater-OcrTiffTesseractWebservice.git
+RUN cd /usr/local && git clone https://github.com/HW-RajKD/OcrTiffTesseractWebservice.git
 
 # Step-9 : Build the project
-RUN cd /usr/local/HeavyWater-OcrTiffTesseractWebservice && $MAVEN_HOME/bin/mvn clean install -Dtest=TestWebService
+RUN cd /usr/local/OcrTiffTesseractWebservice && $MAVEN_HOME/bin/mvn clean install -Dtest=TestWebService
 
 # Step-10 : Deploy the war in tomcat
 RUN rm -rf ${CATALINA_HOME}/webapps/*
-RUN cp /usr/local/HeavyWater-OcrTiffTesseractWebservice/target/OcrTiffTesseractWebservice.war $CATALINA_HOME/webapps/
+RUN cp /usr/local/OcrTiffTesseractWebservice/target/OcrTiffTesseractWebservice.war $CATALINA_HOME/webapps/
 
 # Forward HTTP ports
 EXPOSE 80 8080
