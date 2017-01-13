@@ -42,14 +42,6 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR_VERSION
  	rm apache-tomcat-*.tar.gz && \
  	mv apache-tomcat* $CATALINA_HOME
 	
-# Step-5(b) : Create Tomcat admin user	
-ADD create_tomcat_admin_user.sh /create_tomcat_admin_user.sh
-RUN mkdir /etc/service/tomcat
-ADD run.sh /etc/service/tomcat/run
-RUN chmod +x /*.sh
-RUN chmod +x /etc/service/tomcat/run
-
-RUN ls /usr/local/
 # Step-6 : Install Git
 RUN apt-get update && apt-get install -y git
 
