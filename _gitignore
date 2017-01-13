@@ -1,0 +1,8 @@
+/target/
+/.apt_generated/
+/.settings/
+/.metadata/
+.DS_Store
+.gitignore
+.project
+.classpath

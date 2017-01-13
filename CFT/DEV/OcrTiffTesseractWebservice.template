@@ -1,0 +1,357 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+	"Description" : "This template Launches 1 Ubuntu instance: OcrTiffTesseractWebservice",
+	"Parameters" : {
+   		"Environment" : {
+       		"Description" : "Whether the environment is acceptance, prod, integration, exploratory",
+         	"Type" : "String", 
+          	"Default" : "acceptance"
+     	}, 
+   		"RestApiId" : {
+       		"Description" : "API ID",
+         	"Type" : "String", 
+          	"Default" : "mgnrl9129c"
+     	}, 
+      	"RestApiRootResourceId" : {
+       		"Description" : "Root resource ID of the API",
+         	"Type" : "String", 
+          	"Default" : "lblhuge6x0"
+     	},
+		"KeyPairName" : {
+			"Description" : "Public/private key pairs allow you to securely connect to your instance after it launches",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"AmiId" : {
+			"Description" : "Amazon AMI",
+			"Type" : "String",
+			"Default" : "ami-d05e75b8"
+		},
+		"WEBAZ1subnet" : {
+			"Description" : "Amazon Subnet",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"ExternalELBAZ1subnet" : {
+			"Description" : "Amazon external ELB Subnet",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"WEBsecuritygroup" : {
+			"Description" : "Amazon SecurityGroup",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"ExternalELBsecuritygroup" : {
+			"Description" : "Amazon SecurityGroup",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"IamInstanceProfile" : {
+			"Description" : "Amazon IamInstanceProfile",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"InstanceType" : {
+			"Description" : "Amazon EC2 instance type for the 1st HWNode",
+			"Type" : "String",
+			"Default" : "c4.large"
+		},
+		"BucketName" : {
+			"Description" : "Amazon EC2 instance type for the 1st HWNode",
+			"Type" : "String",
+			"Default" : "tempjars"
+		},
+		"InstanceCountMin" : {
+		    "Description" : "Min Number of server",
+			"Type" : "String",
+			"Default" : "10"
+		 },
+		"InstanceCountMax" : {
+		    "Description" : "Max Number of server",
+			"Type" : "String",
+			"Default" : "15"
+		 },
+		"APPAZ1subnet" : {
+			"Description" : "Amazon Subnet",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"AppSecuritygroup" : {
+			"Description" : "Amazon SecurityGroup",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"SSLcert" : {
+			"Description" : "SSL certificate",
+			"Type" : "String",
+			"Default" : "arn:aws:acm:us-east-1:248409795601:certificate/5d458673-ad0d-4e55-9157-883cbe3d7e36"
+		},
+		"InternalELBsecuritygroup" : {
+			"Description" : "Amazon SecurityGroup",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"InternalELBAZ1subnet" : {
+			"Description" : "Amazon external ELB Subnet",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"DMZAZ1subnet" : {
+			"Description" : "Amazon Subnet",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"DMZsecuritygroup" : {
+			"Description" : "Amazon SecurityGroup",
+			"Type" : "String",
+			"Default" : ""
+		},
+		"CpuUtilizationScaleUp" : {
+		    "Description" : "Metric CPUUtilization. Specify threshold value in %",
+			"Type" : "String",
+			"Default" : "80"
+		 },
+		 "CpuUtilizationScaleDown" : {
+		    "Description" : "Metric CPUUtilization. Specify threshold value in %",
+			"Type" : "String",
+			"Default" : "40"
+		 },
+		 "UnhealthyHostCount" : {
+		    "Description" : "Metric UnHealthyHostCount. Specify count",
+			"Type" : "String",
+			"Default" : "1"
+		 },
+		 "NotificationTopic" : {
+		    "Description" : "ARN of the SNS topic for notifications",
+			"Type" : "String",
+			"Default" : "arn:aws:sns:us-east-1:805220422390:InterviewAssistant"
+		 }
+	},
+	"Resources" : {
+	"OcrTiffTesseractWebserviceWaitCondition" : {
+			"Type" : "AWS::CloudFormation::WaitCondition",
+			"DependsOn" : "OcrTiffTesseractWebservice",
+			"Properties" : {
+				"Handle" : {
+					"Ref" : "OcrTiffTesseractWebserviceWaitHandle"
+				},
+				"Timeout" : "3600"
+			}
+		},
+		"OcrTiffTesseractWebserviceWaitHandle" : {
+			"Type" : "AWS::CloudFormation::WaitConditionHandle"
+		},
+		"OcrTiffTesseractWebservice" : {
+			"Type" : "AWS::AutoScaling::AutoScalingGroup",
+			"Properties" : {
+				"LaunchConfigurationName" : {
+					"Ref" : "OcrTiffTesseractWebserviceLaunchConfig"
+				},
+				"MinSize":{  
+					"Ref" : "InstanceCountMin"
+				},
+				"MaxSize":{  
+					"Ref" : "InstanceCountMax"
+				},
+				"LoadBalancerNames" : [ { "Ref" : "ElasticLoadBalancer" } ],
+				"Tags" : [{
+						"Key" : "Name",
+						"Value" : "OcrTiffTesseractWebservice",
+						"PropagateAtLaunch" : "true"
+				}],
+				"VPCZoneIdentifier" : [{
+						"Ref" : "WEBAZ1subnet"
+				}]
+			}
+		},
+		"OcrTiffTesseractWebserviceLaunchConfig" : {
+			"Type" : "AWS::AutoScaling::LaunchConfiguration",
+			
+        	"Properties" : {
+				"KeyName" : {
+					"Ref" : "KeyPairName"
+				},
+				"ImageId" : {
+					"Ref" : "AmiId"
+				},
+				"SecurityGroups" : [{
+						"Ref" : "WEBsecuritygroup"
+				}],
+				"InstanceType" : {
+					"Ref" : "InstanceType"
+				},
+				"IamInstanceProfile" : {
+					"Ref" : "IamInstanceProfile"
+				},
+				"UserData" : {
+					"Fn::Base64" : {
+						"Fn::Join" : ["",
+							[
+								"#!/bin/bash \n",
+								"apt-get -y update \n",
+        						"apt-get remove -y awscli \n",
+              					"apt-get install -y unzip \n",
+                   				"curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o /tmp/awscli-bundle.zip \n",
+                       			"unzip /tmp/awscli-bundle.zip -d /tmp \n",
+                          		"/tmp/awscli-bundle/install -i /usr/aws -b /usr/bin/aws \n",
+        						"apt-get -y install jq \n",
+								"apt-get -y install python-pip \n",
+								"apt-get -y install python-setuptools\n",
+                                "apt-get -y install default-jre \n",
+								"apt-get -y install tesseract-ocr \n",
+                                "mkdir aws-cfn-bootstrap-latest \n",
+                                "/bin/mkdir -p /tmp/heavywater/scripts \n",
+                                
+								"pip install boto3 \n",
+								"var1='", {
+									"Ref" : "BucketName"
+								}, "' \n",
+								"/bin/mkdir -p /opt/heavywater/bin \n",
+ 								"/bin/mkdir -p /opt/heavywater/logs \n",
+								"/usr/bin/aws s3 cp s3://$var1'/Installations/apache-tomcat-8.0.23.tar.gz' /opt/heavywater/ --region us-east-1 \n",
+        						"/bin/tar -xvf /opt/heavywater/apache-tomcat-8.0.23.tar.gz -C /opt/heavywater/ \n",
+								"/usr/bin/aws s3 cp s3://$var1'/OcrTiffTesseractWebservice/jars/OcrTiffTesseractWebservice.war' /opt/heavywater/apache-tomcat-8.0.23/webapps/ --region us-east-1 \n",
+	                            "/bin/sh /opt/heavywater/apache-tomcat-8.0.23/bin/startup.sh \n",
+                             	"/usr/bin/aws s3 cp s3://$var1'/OcrTiffTesseractWebservice/apideploy.py' /tmp/heavywater/scripts/ --region us-east-1 \n",
+                              	"echo '{\"API_ID\":\"'",{"Ref" : "RestApiId" },"'\",\"ENVIRONMENT\":\"'",{"Ref" : "Environment" },"'\"}' >/opt/heavywater/apivariables.txt \n",
+                             	"/usr/bin/python /tmp/heavywater/scripts/apideploy.py '",{"Ref" : "RestApiId" },"' '",{"Ref" : "RestApiRootResourceId" },"' '",{"Ref" : "Environment" },"' '",{"Fn::GetAtt" : ["ElasticLoadBalancer", "DNSName"]},"'>/tmp/apideployLog.txt \n",
+                                "/usr/bin/aws s3 cp s3://$var1'/Installations/CheckElbHealthCheck.py' /tmp/ --region us-east-1 \n",
+							    "/usr/bin/python /tmp/CheckElbHealthCheck.py ", { "Ref" : "ElasticLoadBalancer" }, " ", { "Ref" : "AWS::Region" }, "\n",
+								
+								"curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz | tar xz -C aws-cfn-bootstrap-latest --strip-components 1\n",
+                                "easy_install aws-cfn-bootstrap-latest \n",
+                                "/usr/local/bin/cfn-signal --exit-code $? '", { "Ref" : "OcrTiffTesseractWebserviceWaitHandle" }, "'\n"
+					
+							]
+						]
+					}
+				}
+			}
+		},	
+		"WebServerScaleUpPolicy" : {
+			"Type" : "AWS::AutoScaling::ScalingPolicy",
+			"Properties" : {
+				"AdjustmentType" : "ChangeInCapacity",
+				"AutoScalingGroupName" : { "Ref" : "OcrTiffTesseractWebservice" },
+				"Cooldown" : "60",
+				"ScalingAdjustment" : "1"
+			}
+		},
+		"WebServerScaleDownPolicy" : {
+			"Type" : "AWS::AutoScaling::ScalingPolicy",
+			"Properties" : {
+				"AdjustmentType" : "ChangeInCapacity",
+				"AutoScalingGroupName" : { "Ref" : "OcrTiffTesseractWebservice" },
+				"Cooldown" : "60",
+				"ScalingAdjustment" : "-1"
+			}
+		},
+		"CpuUtilizationAlarmLow": {
+			"Type": "AWS::CloudWatch::Alarm",
+			"Properties": {
+				"AlarmDescription": {
+					"Fn::Join" : ["", ["Scale-down if CPU < ", { "Ref" : "CpuUtilizationScaleDown" }, "% for 10 minutes"]]
+				},
+				"MetricName": "CPUUtilization",
+				"Namespace": "AWS/EC2",
+				"Statistic": "Average",
+				"Period": "300",
+				"EvaluationPeriods": "2",
+				"Threshold": { "Ref" : "CpuUtilizationScaleDown" },
+				"AlarmActions": [ { "Ref": "WebServerScaleDownPolicy" }, { "Ref" : "NotificationTopic" } ],
+				"Dimensions": [{
+					"Name": "AutoScalingGroupName",
+					"Value": { "Ref": "OcrTiffTesseractWebservice" }
+				}],
+				"ComparisonOperator": "LessThanThreshold"
+			}
+		},
+		"CpuUtilizationAlarmHigh": {
+			"Type": "AWS::CloudWatch::Alarm",
+			"Properties": {
+				"AlarmDescription": {
+					"Fn::Join" : ["", ["Scale-up if CPU > ", { "Ref" : "CpuUtilizationScaleUp" }, "% for 10 minutes"]]
+				},
+				"MetricName": "CPUUtilization",
+				"Namespace": "AWS/EC2",
+				"Statistic": "Average",
+				"Period": "300",
+				"EvaluationPeriods": "2",
+				"Threshold": { "Ref" : "CpuUtilizationScaleUp" },
+				"AlarmActions": [ { "Ref": "WebServerScaleUpPolicy" }, { "Ref" : "NotificationTopic" } ],
+				"Dimensions": [{
+					"Name": "AutoScalingGroupName",
+					"Value": { "Ref": "OcrTiffTesseractWebservice" }
+				}],
+				"ComparisonOperator": "GreaterThanThreshold"
+			}
+		},
+		"UnhealthyHostsDetected" : {
+			"Type" : "AWS::CloudWatch::Alarm",
+			"Properties" : {
+				"AlarmDescription": {
+					"Fn::Join" : ["", ["Cloudwatch alarm for ElasticLoadBalancer if UnHealthyHostCount >= ", { "Ref" : "UnhealthyHostCount" }, " for 1 minute"]]
+				},
+				"AlarmActions" : [  { "Ref" : "NotificationTopic" } ],
+				"OKActions" : [  { "Ref" : "NotificationTopic" } ],
+				"MetricName" : "UnHealthyHostCount",
+				"Namespace" : "AWS/ELB",
+				"Statistic" : "Sum",
+				"Period" : "60",
+				"EvaluationPeriods" : "1",
+				"Threshold" : { "Ref" : "UnhealthyHostCount" },
+				"ComparisonOperator" : "GreaterThanOrEqualToThreshold",
+				"Dimensions" : [ {
+					"Name" : "LoadBalancerName",
+					"Value" : { "Ref" : "ElasticLoadBalancer" }
+				} ]
+			}
+		},
+		"ElasticLoadBalancer" : {
+			"Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+			"Properties" : {
+				"Subnets" : [{
+						"Ref" : "ExternalELBAZ1subnet"
+					}
+				],
+				"SecurityGroups" : [{
+						"Ref" : "ExternalELBsecuritygroup"
+					}
+				],
+				"Listeners" : [{
+                        "LoadBalancerPort" : "80",
+                        "InstancePort" : "8080",
+                        "Protocol" : "HTTP"
+                    }
+                ],
+				"HealthCheck" : {
+					"Target" : "HTTP:8080/",
+					"HealthyThreshold" : "3",
+					"UnhealthyThreshold" : "5",
+					"Interval" : "30",
+					"Timeout" : "5"
+				},
+				"ConnectionDrainingPolicy" : {
+					"Enabled" : "true",
+					"Timeout" : "300"
+				},
+				"ConnectionSettings" : {
+					"IdleTimeout" : "3600"
+				}
+			}
+		}
+
+},
+	"Outputs" : {
+		"Url" : {
+		"Value" : {
+				"Fn::Join" : ["", ["http://", {
+							"Fn::GetAtt" : ["ElasticLoadBalancer", "DNSName"]
+						}, "/OcrTiffTesseractWebservice/rest/ocrtifftesseract"]]
+			},
+			"Description" : "Url"
+		}
+	}
+}
+

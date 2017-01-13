@@ -1,2 +1,1 @@
-# OcrTiffTesseractWebservice
-Trying OcrTiffTesseractWebservice for Docker
+#Heavywater-OcrTiffTesseractWebservice
