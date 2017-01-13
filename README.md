@@ -1,0 +1,2 @@
+# OcrTiffTesseractWebservice
+Trying OcrTiffTesseractWebservice for Docker
