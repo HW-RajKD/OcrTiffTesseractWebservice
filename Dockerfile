@@ -44,7 +44,7 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR_VERSION
 	
 # Step-6(a) : Install Git
 RUN apt-get update && apt-get install -y git
-RUN mkdir /root/.ssh/
+#RUN mkdir /root/.ssh/
 ADD id_rsa /root/.ssh/id_rsa
 
 # Step-6(b) : Create known_hosts
