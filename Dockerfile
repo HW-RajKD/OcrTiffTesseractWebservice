@@ -54,9 +54,9 @@ RUN sudo chmod 600 ~/.ssh/id_rsa.pub
 RUN touch /root/.ssh/known_hosts
 
 # Step-6(c) : Add github key
-RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN sudo chmod 644 ~/.ssh/known_hosts
 RUN sudo chmod 755 ~/.ssh
+RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
 # Step-7 : Install Maven
 ENV MAVEN_VERSION 3.3.9	
@@ -70,6 +70,7 @@ ENV MAVEN_HOME /usr/share/maven
 VOLUME /root/.m2
 
 # Step-8 : Get the project from github
+RUN ssh -v git@github.com:HeavyWater-Solutions/HeavyWater-OcrTiffTesseractWebservice.git
 RUN cd /usr/local && git clone git@github.com:HeavyWater-Solutions/HeavyWater-OcrTiffTesseractWebservice.git
 
 # Step-9 : Build the project
