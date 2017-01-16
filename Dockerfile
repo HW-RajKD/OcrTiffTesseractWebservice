@@ -46,12 +46,15 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR_VERSION
 RUN apt-get update && apt-get install -y git
 #RUN mkdir /root/.ssh/
 ADD id_rsa /root/.ssh/id_rsa
+RUN sudo chmod 600 ~/.ssh/id_rsa
 
 # Step-6(b) : Create known_hosts
 RUN touch /root/.ssh/known_hosts
 
 # Step-6(c) : Add github key
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+RUN sudo chmod 644 ~/.ssh/known_hosts
+RUN sudo chmod 755 ~/.ssh
 
 # Step-7 : Install Maven
 ENV MAVEN_VERSION 3.3.9	
@@ -65,7 +68,7 @@ ENV MAVEN_HOME /usr/share/maven
 VOLUME /root/.m2
 
 # Step-8 : Get the project from github
-RUN cd /usr/local && git clone https://github.com/HeavyWater-Solutions/HeavyWater-OcrTiffTesseractWebservice.git
+RUN cd /usr/local && git clone git@github.com:HeavyWater-Solutions/HeavyWater-OcrTiffTesseractWebservice.git
 
 # Step-9 : Build the project
 RUN cd /usr/local/OcrTiffTesseractWebservice && $MAVEN_HOME/bin/mvn clean install -Dtest=TestWebService
