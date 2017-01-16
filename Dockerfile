@@ -65,7 +65,7 @@ ENV MAVEN_HOME /usr/share/maven
 VOLUME /root/.m2
 
 # Step-8 : Get the project from github
-RUN cd /usr/local && git clone git@github.com:HeavyWater-Solutions/HeavyWater-OcrTiffTesseractWebservice.git
+RUN cd /usr/local && git clone https://github.com/HeavyWater-Solutions/HeavyWater-OcrTiffTesseractWebservice.git
 
 # Step-9 : Build the project
 RUN cd /usr/local/OcrTiffTesseractWebservice && $MAVEN_HOME/bin/mvn clean install -Dtest=TestWebService
